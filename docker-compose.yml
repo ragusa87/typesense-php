@@ -1,7 +1,7 @@
-version: '3.5'
-
 services:
   typesense:
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8108/health"]
     image: typesense/typesense:27.0.rc21
     environment:
       TYPESENSE_DATA_DIR: /data
@@ -11,3 +11,14 @@ services:
     ports:
       - 8108:8108
     restart: 'no'
+  php:
+    environment:
+      - TYPESENSE_NODE_HOST=typesense
+      - TYPESENSE_NODE_PORT=8108
+      - TYPESENSE_NODE_PROTOCOL=http
+      - TYPESENSE_API_KEY=xyz
+      - XDEBUG_MODE=coverage
+    build:
+        context: .
+        dockerfile: Dockerfile
+    command: vendor/bin/phpunit --coverage-text --testdox tests/Feature/MetricsPsr18Test.php
